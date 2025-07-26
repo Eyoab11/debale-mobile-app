@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:debale/features/search/presentation/pages/room_details_page.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -10,447 +12,206 @@ class SearchPage extends ConsumerStatefulWidget {
 
 class _SearchPageState extends ConsumerState<SearchPage> {
   final _searchController = TextEditingController();
-  String _selectedSortBy = 'Relevance';
-  bool _showFilters = false;
+  final _locationController = TextEditingController();
+  String _selectedPriceRange = 'Any';
+  String _selectedRoomType = 'Any';
+  String _selectedGender = 'Any';
+  bool _showAdvancedFilters = false;
+
+  final List<Map<String, dynamic>> _mockRooms = [
+    {
+      'id': '1',
+      'title': 'Cozy Studio Near AAU',
+      'location': 'Bole, Addis Ababa',
+      'price': 8000,
+      'roomType': 'Studio',
+      'gender': 'Female',
+      'availableFrom': '2024-01-15',
+      'imageUrl': 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop',
+      'amenities': ['WiFi', 'Kitchen', 'Bathroom'],
+      'description': 'Beautiful studio apartment with modern amenities, perfect for students.',
+      'rating': 4.5,
+      'reviews': 12,
+    },
+    {
+      'id': '2',
+      'title': 'Shared Room in Student House',
+      'location': 'Kazanchis, Addis Ababa',
+      'price': 4500,
+      'roomType': 'Shared',
+      'gender': 'Male',
+      'availableFrom': '2024-01-20',
+      'imageUrl': 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=200&fit=crop',
+      'amenities': ['WiFi', 'Kitchen', 'Laundry', 'Study Area'],
+      'description': 'Friendly student house with shared facilities and study areas.',
+      'rating': 4.2,
+      'reviews': 8,
+    },
+    {
+      'id': '3',
+      'title': 'Private Room with Balcony',
+      'location': 'Saris, Addis Ababa',
+      'price': 12000,
+      'roomType': 'Private',
+      'gender': 'Any',
+      'availableFrom': '2024-02-01',
+      'imageUrl': 'https://images.unsplash.com/photo-1560448075-bb485b067938?w=300&h=200&fit=crop',
+      'amenities': ['WiFi', 'Kitchen', 'Bathroom', 'Balcony', 'Parking'],
+      'description': 'Spacious private room with beautiful balcony view and parking.',
+      'rating': 4.8,
+      'reviews': 15,
+    },
+    {
+      'id': '4',
+      'title': 'Budget-Friendly Student Room',
+      'location': 'Megenagna, Addis Ababa',
+      'price': 3500,
+      'roomType': 'Private',
+      'gender': 'Female',
+      'availableFrom': '2024-01-10',
+      'imageUrl': 'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=300&h=200&fit=crop',
+      'amenities': ['WiFi', 'Kitchen'],
+      'description': 'Affordable room perfect for students on a budget.',
+      'rating': 4.0,
+      'reviews': 6,
+    },
+  ];
 
   @override
   void dispose() {
     _searchController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      body: Column(
-        children: [
-          _buildHeader(),
-          _buildSearchBar(),
+      backgroundColor: Colors.grey[50],
+      body: CustomScrollView(
+        slivers: [
+          _buildAppBar(),
+          _buildSearchSection(),
           _buildResultsHeader(),
-          Expanded(
-            child: _buildJobListings(),
-          ),
+          _buildRoomGrid(),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
+  Widget _buildAppBar() {
+    return SliverAppBar(
+      expandedHeight: 120,
+      floating: false,
+      pinned: true,
+      backgroundColor: const Color(0xFFF6CB5A),
+      flexibleSpace: FlexibleSpaceBar(
+        title: const Text(
+          'Find Your Room',
+          style: TextStyle(
+            color: Color(0xFF222222),
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color(0xFF222222)),
-                onPressed: () => Navigator.pop(context),
-              ),
-              const Icon(
-                Icons.coffee,
-                color: Color(0xFFF6CB5A),
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'DebalE',
-                style: TextStyle(
-                  color: Color(0xFF222222),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+        ),
+        background: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFF6CB5A), Color(0xFFF4A261)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  // TODO: Navigate to dashboard
-                },
-                child: const Text(
-                  'Dashboard',
-                  style: TextStyle(
-                    color: Color(0xFF222222),
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              TextButton(
-                onPressed: () {
-                  // TODO: Navigate to messages
-                },
-                child: const Text(
-                  'Messages',
-                  style: TextStyle(
-                    color: Color(0xFF222222),
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Find Your Perfect Job',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF222222),
+  Widget _buildSearchSection() {
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Search Bar
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Search rooms, locations, or keywords...',
+                  prefixIcon: Icon(Icons.search, color: Color(0xFFF6CB5A)),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Discover opportunities that match your skills and career goals',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by job title, company, or location...',
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFFF6CB5A)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.grey),
+            const SizedBox(height: 12),
+            
+            // Filter and Search Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                setState(() {
+                        _showAdvancedFilters = !_showAdvancedFilters;
+                });
+              },
+                    icon: const Icon(Icons.filter_list, color: Color(0xFFF6CB5A)),
+                    label: const Text('Filters', style: TextStyle(color: Color(0xFFF6CB5A))),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFF6CB5A)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFF6CB5A), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _showFilters = !_showFilters;
-                  });
-                },
-                icon: const Icon(Icons.filter_list, color: Color(0xFF222222)),
-                label: const Text(
-                  'Filters',
-                  style: TextStyle(color: Color(0xFF222222)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // TODO: Implement search
+                    },
+                    icon: const Icon(Icons.search, color: Color(0xFF222222)),
+                    label: const Text('Search', style: TextStyle(color: Color(0xFF222222))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF6CB5A),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF6CB5A),
-                  side: const BorderSide(color: Color(0xFFF6CB5A)),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Perform search
-                },
-                icon: const Icon(Icons.search, color: Color(0xFF222222)),
-                label: const Text(
-                  'Search',
-                  style: TextStyle(color: Color(0xFF222222)),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF6CB5A),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-              ),
+              ],
+            ),
+            
+            // Advanced Filters
+            if (_showAdvancedFilters) ...[
+              const SizedBox(height: 16),
+              _buildAdvancedFilters(),
             ],
-          ),
-          if (_showFilters) ...[
-            const SizedBox(height: 16),
-            _buildFilterOptions(),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildFilterOptions() {
+  Widget _buildAdvancedFilters() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Filter Options',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF222222),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: 'All Job Types',
-                  decoration: const InputDecoration(
-                    labelText: 'Job Type',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['All Job Types', 'Full-time', 'Part-time', 'Contract', 'Internship', 'Remote']
-                      .map((type) => DropdownMenuItem(value: type, child: Text(type)))
-                      .toList(),
-                  onChanged: (value) {
-                    // TODO: Handle job type filter
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: 'All Experience Levels',
-                  decoration: const InputDecoration(
-                    labelText: 'Experience Level',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['All Experience Levels', 'Entry Level', 'Junior', 'Mid-level', 'Senior', 'Lead']
-                      .map((level) => DropdownMenuItem(value: level, child: Text(level)))
-                      .toList(),
-                  onChanged: (value) {
-                    // TODO: Handle experience level filter
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: 'Any Salary',
-                  decoration: const InputDecoration(
-                    labelText: 'Salary Range',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['Any Salary', '0-10,000 Birr', '10,000-25,000 Birr', '25,000-50,000 Birr', '50,000+ Birr']
-                      .map((range) => DropdownMenuItem(value: range, child: Text(range)))
-                      .toList(),
-                  onChanged: (value) {
-                    // TODO: Handle salary filter
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultsHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      color: Colors.white,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Available Jobs',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF222222),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '12 jobs found in Addis Ababa',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const Text(
-                'Sort by: ',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-              DropdownButton<String>(
-                value: _selectedSortBy,
-                underline: Container(),
-                items: ['Relevance', 'Salary: High to Low', 'Salary: Low to High', 'Date Posted', 'Experience Level']
-                    .map((sort) => DropdownMenuItem(value: sort, child: Text(sort)))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedSortBy = value!;
-                  });
-                },
-                style: const TextStyle(
-                  color: Color(0xFFF6CB5A),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildJobListings() {
-    // Mock job data
-    final jobs = [
-      {
-        'title': 'Senior Flutter Developer',
-        'company': 'TechCorp Ethiopia',
-        'location': 'Bole, Addis Ababa',
-        'salary': '45,000',
-        'type': 'Full-time',
-        'experience': '3-5 years',
-        'rating': 4.8,
-        'reviews': 12,
-        'isFeatured': true,
-        'isVerified': true,
-        'skills': ['Flutter', 'Dart', 'Firebase'],
-        'benefits': ['Health Insurance', 'Remote Work', 'Flexible Hours'],
-      },
-      {
-        'title': 'Frontend Developer',
-        'company': 'Digital Solutions Ltd',
-        'location': 'Kirkos, Addis Ababa',
-        'salary': '35,000',
-        'type': 'Full-time',
-        'experience': '1-3 years',
-        'rating': 4.5,
-        'reviews': 8,
-        'isFeatured': false,
-        'isVerified': true,
-        'skills': ['React', 'JavaScript', 'CSS'],
-        'benefits': ['Health Insurance', 'Professional Development'],
-      },
-      {
-        'title': 'Backend Engineer',
-        'company': 'Innovation Hub',
-        'location': 'Yeka, Addis Ababa',
-        'salary': '50,000',
-        'type': 'Contract',
-        'experience': '5-8 years',
-        'rating': 4.9,
-        'reviews': 15,
-        'isFeatured': true,
-        'isVerified': true,
-        'skills': ['Node.js', 'Python', 'MongoDB'],
-        'benefits': ['Health Insurance', 'Retirement Plan', 'Gym Membership'],
-      },
-      {
-        'title': 'UI/UX Designer',
-        'company': 'Creative Studio',
-        'location': 'Kazanchis, Addis Ababa',
-        'salary': '30,000',
-        'type': 'Part-time',
-        'experience': '2-4 years',
-        'rating': 4.6,
-        'reviews': 6,
-        'isFeatured': false,
-        'isVerified': false,
-        'skills': ['Figma', 'Adobe XD', 'Prototyping'],
-        'benefits': ['Flexible Hours', 'Remote Work'],
-      },
-      {
-        'title': 'DevOps Engineer',
-        'company': 'CloudTech Solutions',
-        'location': 'Meskel Square, Addis Ababa',
-        'salary': '55,000',
-        'type': 'Full-time',
-        'experience': '4-6 years',
-        'rating': 4.7,
-        'reviews': 10,
-        'isFeatured': false,
-        'isVerified': true,
-        'skills': ['AWS', 'Docker', 'Kubernetes'],
-        'benefits': ['Health Insurance', 'Transportation Allowance'],
-      },
-      {
-        'title': 'Mobile App Developer',
-        'company': 'AppWorks Ethiopia',
-        'location': 'Sidist Kilo, Addis Ababa',
-        'salary': '40,000',
-        'type': 'Full-time',
-        'experience': '2-4 years',
-        'rating': 4.4,
-        'reviews': 7,
-        'isFeatured': false,
-        'isVerified': true,
-        'skills': ['React Native', 'iOS', 'Android'],
-        'benefits': ['Health Insurance', 'Meal Allowance'],
-      },
-    ];
-
-    return GridView.builder(
-      padding: const EdgeInsets.all(24),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.8,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: jobs.length,
-      itemBuilder: (context, index) {
-        final job = jobs[index];
-        return _buildJobCard(job);
-      },
-    );
-  }
-
-  Widget _buildJobCard(Map<String, dynamic> job) {
-    return Container(
-      decoration: BoxDecoration(
+              decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -459,231 +220,302 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image section with tags
-          Stack(
-            children: [
-              Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF6CB5A),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.work,
-                    size: 40,
-                    color: Color(0xFF222222),
-                  ),
+          const Text(
+            'Advanced Filters',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF222222),
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Location
+          TextField(
+            controller: _locationController,
+            decoration: const InputDecoration(
+              labelText: 'Location',
+              hintText: 'Enter city or area',
+              prefixIcon: Icon(Icons.location_on, color: Color(0xFFF6CB5A)),
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          
+          // Price Range
+          DropdownButtonFormField<String>(
+            value: _selectedPriceRange,
+            decoration: const InputDecoration(
+              labelText: 'Price Range',
+              prefixIcon: Icon(Icons.attach_money, color: Color(0xFFF6CB5A)),
+              border: OutlineInputBorder(),
+            ),
+            items: ['Any', 'Under 5,000', '5,000 - 10,000', '10,000 - 15,000', 'Over 15,000']
+                .map((range) => DropdownMenuItem(value: range, child: Text(range)))
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedPriceRange = value!;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          
+          // Room Type
+          DropdownButtonFormField<String>(
+            value: _selectedRoomType,
+            decoration: const InputDecoration(
+              labelText: 'Room Type',
+              prefixIcon: Icon(Icons.bed, color: Color(0xFFF6CB5A)),
+              border: OutlineInputBorder(),
+            ),
+            items: ['Any', 'Private', 'Shared', 'Studio']
+                .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedRoomType = value!;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          
+          // Gender Preference
+          DropdownButtonFormField<String>(
+            value: _selectedGender,
+            decoration: const InputDecoration(
+              labelText: 'Gender Preference',
+              prefixIcon: Icon(Icons.person, color: Color(0xFFF6CB5A)),
+              border: OutlineInputBorder(),
+            ),
+            items: ['Any', 'Male', 'Female']
+                .map((gender) => DropdownMenuItem(value: gender, child: Text(gender)))
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedGender = value!;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultsHeader() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${_mockRooms.length} rooms found',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF222222),
+              ),
+            ),
+            DropdownButton<String>(
+              value: 'Relevance',
+              items: ['Relevance', 'Price: Low to High', 'Price: High to Low', 'Rating']
+                  .map((sort) => DropdownMenuItem(value: sort, child: Text(sort)))
+                  .toList(),
+              onChanged: (value) {
+                // TODO: Implement sorting
+              },
+              underline: Container(),
+              icon: const Icon(Icons.sort, color: Color(0xFFF6CB5A)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoomGrid() {
+    return SliverPadding(
+      padding: const EdgeInsets.all(16),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => _buildRoomCard(_mockRooms[index]),
+          childCount: _mockRooms.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoomCard(Map<String, dynamic> room) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RoomDetailsPage(room: room),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image section
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Image.network(
+                  room['imageUrl'],
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF6CB5A),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.home,
+                          size: 40,
+                          color: Color(0xFF222222),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-              if (job['isFeatured'])
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF6CB5A),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Featured',
-                      style: TextStyle(
-                        color: Color(0xFF222222),
-                        fontSize: 10,
+            ),
+            
+            // Content section
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      room['title'],
+                      style: const TextStyle(
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF222222),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ),
-              if (job['isVerified'])
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    const SizedBox(height: 4),
+                    
+                    // Location
+                    Row(
                       children: [
-                        const Icon(Icons.verified, color: Colors.white, size: 12),
+                        const Icon(Icons.location_on, size: 12, color: Colors.grey),
                         const SizedBox(width: 4),
-                        const Text(
-                          'Verified',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            room['location'],
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton(
-                  icon: const Icon(Icons.favorite_border, color: Color(0xFF222222)),
-                  onPressed: () {
-                    // TODO: Add to favorites
-                  },
+                    const SizedBox(height: 8),
+                    
+                    // Price
+                    Text(
+                      'ETB ${room['price'].toString()}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFF6CB5A),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Room details
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF6CB5A).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            room['roomType'],
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF222222),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF6CB5A).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            room['gender'],
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF222222),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Rating
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Color(0xFFF6CB5A), size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${room['rating']} (${room['reviews']})',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-          // Content section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  job['title'],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF222222),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${job['salary']} Birr',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFF6CB5A),
-                  ),
-                ),
-                const Text(
-                  'per month',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Color(0xFFF6CB5A), size: 16),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        job['location'],
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.work, color: Color(0xFFF6CB5A), size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      job['type'],
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    const Icon(Icons.person, color: Color(0xFFF6CB5A), size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      job['experience'],
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Color(0xFFF6CB5A), size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${job['rating']} (${job['reviews']} reviews)',
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: (job['skills'] as List<dynamic>).take(3).map<Widget>((skill) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF6CB5A).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      skill.toString(),
-                      style: const TextStyle(
-                        color: Color(0xFF222222),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )).toList(),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: View job details
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF6CB5A),
-                          foregroundColor: const Color(0xFF222222),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
-                        child: const Text(
-                          'View Details',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // TODO: Contact employer
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFF6CB5A),
-                          side: const BorderSide(color: Color(0xFFF6CB5A)),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
-                        child: const Text(
-                          'Apply',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

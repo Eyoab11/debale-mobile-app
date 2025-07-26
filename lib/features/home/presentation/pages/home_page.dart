@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:debale/features/search/presentation/pages/search_page.dart';
 import 'package:debale/features/messages/presentation/pages/messages_page.dart';
 import 'package:debale/features/profile/presentation/pages/profile_page.dart';
@@ -110,11 +111,15 @@ class HomeContentPage extends ConsumerWidget {
                 size: 32,
                 color: Color(0xFF222222),
               ),
-              IconButton(
-                icon: const Icon(Icons.notifications, color: Color(0xFF222222)),
-                onPressed: () {
-                  // TODO: Navigate to notifications
-                },
+              Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.notifications, color: Color(0xFF222222)),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Notifications coming soon!')),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -156,7 +161,7 @@ class HomeContentPage extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: 200,
+            height: 220,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -165,21 +170,21 @@ class HomeContentPage extends ConsumerWidget {
                   quote: "Found my perfect roommate through DebalE! The verification system gave me peace of mind.",
                   name: "Abebe Kebede",
                   role: "AAU Student",
-                  avatarColor: Colors.green,
+                  imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
                 ),
                 _buildTestimonialCard(
                   rating: 5,
                   quote: "Affordable and safe housing options. The local expertise really makes a difference.",
                   name: "Sara Haile",
                   role: "Software Developer",
-                  avatarColor: Colors.blue,
+                  imageUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=300&fit=crop",
                 ),
                 _buildTestimonialCard(
                   rating: 5,
                   quote: "As a room provider, I feel confident knowing all users are verified. Great platform!",
                   name: "Mulugeta Desta",
                   role: "Room Provider",
-                  avatarColor: Colors.purple,
+                  imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop",
                 ),
               ],
             ),
@@ -194,10 +199,10 @@ class HomeContentPage extends ConsumerWidget {
     required String quote,
     required String name,
     required String role,
-    required Color avatarColor,
+    required String imageUrl,
   }) {
     return Container(
-      width: 280,
+      width: 300,
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -213,8 +218,8 @@ class HomeContentPage extends ConsumerWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           Row(
             children: List.generate(5, (index) => const Icon(
               Icons.star,
@@ -229,41 +234,52 @@ class HomeContentPage extends ConsumerWidget {
               fontSize: 14,
               color: Color(0xFF222222),
               height: 1.4,
-            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: avatarColor,
-                child: Text(
-                  name.split(' ').map((e) => e[0]).join(''),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  imageUrl,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(Icons.person, color: Colors.grey),
+                    );
+                },
               ),
+            ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF222222),
+            Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF222222),
+                      ),
                     ),
-                  ),
-                  Text(
-                    role,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                    Text(
+                      role,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+              ),
+            ),
+          ],
+                ),
               ),
             ],
           ),
@@ -295,26 +311,62 @@ class HomeContentPage extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(child: _buildFeatureCard(
-                icon: Icons.person_add,
-                title: 'Create Profile',
-                description: 'Tell us about yourself, your preferences, and what you\'re looking for in a roommate or room.',
-              )),
-              const SizedBox(width: 16),
-              Expanded(child: _buildFeatureCard(
-                icon: Icons.search,
-                title: 'Smart Matching',
-                description: 'Our algorithm finds compatible matches based on location, budget, lifestyle, and preferences.',
-              )),
-              const SizedBox(width: 16),
-              Expanded(child: _buildFeatureCard(
-                icon: Icons.chat_bubble,
-                title: 'Connect Safely',
-                description: 'Chat securely, meet in safe locations, and move in with confidence using our verification system.',
-              )),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 600) {
+                // Desktop layout
+                return Row(
+                  children: [
+                    Expanded(child: _buildFeatureCard(
+                      icon: Icons.person_add,
+                      title: 'Create Profile',
+                      description: 'Tell us about yourself, your preferences, and what you\'re looking for in a roommate or room.',
+                      imageUrl: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=300&h=200&fit=crop",
+                    )),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildFeatureCard(
+                      icon: Icons.search,
+                      title: 'Smart Matching',
+                      description: 'Our algorithm finds compatible matches based on location, budget, lifestyle, and preferences.',
+                      imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop",
+                    )),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildFeatureCard(
+                      icon: Icons.chat_bubble,
+                      title: 'Connect Safely',
+                      description: 'Chat securely, meet in safe locations, and move in with confidence using our verification system.',
+                      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop",
+                    )),
+                  ],
+                );
+              } else {
+                // Mobile layout
+                return Column(
+                  children: [
+                    _buildFeatureCard(
+                      icon: Icons.person_add,
+                      title: 'Create Profile',
+                      description: 'Tell us about yourself, your preferences, and what you\'re looking for in a roommate or room.',
+                      imageUrl: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=300&h=200&fit=crop",
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFeatureCard(
+                      icon: Icons.search,
+                      title: 'Smart Matching',
+                      description: 'Our algorithm finds compatible matches based on location, budget, lifestyle, and preferences.',
+                      imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop",
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFeatureCard(
+                      icon: Icons.chat_bubble,
+                      title: 'Connect Safely',
+                      description: 'Chat securely, meet in safe locations, and move in with confidence using our verification system.',
+                      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop",
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ],
       ),
@@ -325,11 +377,49 @@ class HomeContentPage extends ConsumerWidget {
     required IconData icon,
     required String title,
     required String description,
+    required String imageUrl,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
+          padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+          child: Column(
+            children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: double.infinity,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF6CB5A),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: const Color(0xFF222222),
+                    size: 40,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
           Container(
             width: 60,
             height: 60,
@@ -338,32 +428,32 @@ class HomeContentPage extends ConsumerWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              icon,
+                icon,
               color: const Color(0xFF222222),
               size: 30,
             ),
-          ),
+              ),
           const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
+              Text(
+                title,
+                style: const TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.bold,
               color: Color(0xFF222222),
-            ),
+                ),
             textAlign: TextAlign.center,
-          ),
+              ),
           const SizedBox(height: 8),
-          Text(
+              Text(
             description,
             style: const TextStyle(
-              fontSize: 12,
+                  fontSize: 12,
               color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -390,26 +480,62 @@ class HomeContentPage extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(child: _buildFeatureCard(
-                icon: Icons.verified_user,
-                title: 'Verified Profiles',
-                description: 'All users are verified with phone numbers, student IDs, or employment letters for your safety.',
-              )),
-              const SizedBox(width: 16),
-              Expanded(child: _buildFeatureCard(
-                icon: Icons.location_on,
-                title: 'Local Expertise',
-                description: 'Deep understanding of Ethiopian cities, universities, and cultural preferences.',
-              )),
-              const SizedBox(width: 16),
-              Expanded(child: _buildFeatureCard(
-                icon: Icons.people,
-                title: 'Cultural Matching',
-                description: 'Find roommates who share your cultural values, language preferences, and lifestyle.',
-              )),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 600) {
+                // Desktop layout
+                return Row(
+                  children: [
+                    Expanded(child: _buildFeatureCard(
+                      icon: Icons.verified_user,
+                      title: 'Verified Profiles',
+                      description: 'All users are verified with phone numbers, student IDs, or employment letters for your safety.',
+                      imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop",
+                    )),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildFeatureCard(
+                      icon: Icons.location_on,
+                      title: 'Local Expertise',
+                      description: 'Deep understanding of Ethiopian cities, universities, and cultural preferences.',
+                      imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
+                    )),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildFeatureCard(
+                      icon: Icons.people,
+                      title: 'Cultural Matching',
+                      description: 'Find roommates who share your cultural values, language preferences, and lifestyle.',
+                      imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop",
+                    )),
+                  ],
+                );
+              } else {
+                // Mobile layout
+                return Column(
+                  children: [
+                    _buildFeatureCard(
+                      icon: Icons.verified_user,
+                      title: 'Verified Profiles',
+                      description: 'All users are verified with phone numbers, student IDs, or employment letters for your safety.',
+                      imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=200&fit=crop",
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFeatureCard(
+                      icon: Icons.location_on,
+                      title: 'Local Expertise',
+                      description: 'Deep understanding of Ethiopian cities, universities, and cultural preferences.',
+                      imageUrl: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFeatureCard(
+                      icon: Icons.people,
+                      title: 'Cultural Matching',
+                      description: 'Find roommates who share your cultural values, language preferences, and lifestyle.',
+                      imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&h=200&fit=crop",
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ],
       ),
@@ -417,143 +543,222 @@ class HomeContentPage extends ConsumerWidget {
   }
 
   Widget _buildCallToActionSection() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFF6CB5A), Color(0xFFF4A261)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Builder(
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF6CB5A), Color(0xFFF4A261)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Ready to Find Your Perfect Match?',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF222222),
+        child: Column(
+          children: [
+            const Text(
+              'Ready to Find Your Perfect Match?',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF222222),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Join thousands of Ethiopian students and professionals who found their ideal living situation',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF222222),
+            const SizedBox(height: 8),
+            const Text(
+              'Join thousands of Ethiopian students and professionals who found their ideal living situation',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF222222),
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Navigate to registration
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF222222),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            const SizedBox(height: 24),
+            LayoutBuilder(
+              builder: (layoutContext, constraints) {
+                if (constraints.maxWidth > 400) {
+                  return Row(
                     children: [
-                      Text('Get Started Free'),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, size: 16),
+                      Expanded(
+                        child: Builder(
+                          builder: (context) => ElevatedButton(
+                            onPressed: () {
+                              context.go('/register');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF222222),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Get Started Free'),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Builder(
+                          builder: (context) => OutlinedButton(
+                            onPressed: () {
+                              context.go('/search');
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF222222),
+                              side: const BorderSide(color: Color(0xFF222222)),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Browse Rooms'),
+                          ),
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    // TODO: Navigate to browse rooms
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF222222),
-                    side: const BorderSide(color: Color(0xFF222222)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('Browse Rooms'),
-                ),
-              ),
-            ],
-          ),
-        ],
+                  );
+                } else {
+                  return Column(
+                          children: [
+                      Builder(
+                        builder: (context) => SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              context.go('/register');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF222222),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Get Started Free'),
+                                SizedBox(width: 8),
+                                Icon(Icons.arrow_forward, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Builder(
+                        builder: (context) => SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              context.go('/search');
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF222222),
+                              side: const BorderSide(color: Color(0xFF222222)),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Browse Rooms'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFooter() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      color: const Color(0xFF222222),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.coffee,
-                color: Color(0xFFF6CB5A),
-                size: 24,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'DebalE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return Builder(
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        color: const Color(0xFF222222),
+        child: Column(
+          children: [
+            Row(
+      children: [
+                const Icon(
+                  Icons.coffee,
+                  color: Color(0xFFF6CB5A),
+                  size: 24,
                 ),
+                const SizedBox(width: 8),
+        const Text(
+                  'DebalE',
+          style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Connecting Ethiopian students and young professionals with safe, affordable housing solutions',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Connecting Ethiopian students and young professionals with safe, affordable housing solutions',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
             ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildFooterLink('Room Seekers'),
-              _buildFooterLink('Room Providers'),
-              _buildFooterLink('Support'),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Made with ❤️ for Ethiopia',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
+            const SizedBox(height: 24),
+            LayoutBuilder(
+              builder: (layoutContext, constraints) {
+                if (constraints.maxWidth > 400) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildFooterLink('Room Seekers'),
+                      _buildFooterLink('Room Providers'),
+                      _buildFooterLink('Support'),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      _buildFooterLink('Room Seekers'),
+                      const SizedBox(height: 8),
+                      _buildFooterLink('Room Providers'),
+                      const SizedBox(height: 8),
+                      _buildFooterLink('Support'),
+                    ],
+                  );
+                }
+              },
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            const Text(
+              'Made with ❤️ for Ethiopia',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFooterLink(String text) {
-    return TextButton(
-      onPressed: () {
-        // TODO: Navigate to respective pages
-      },
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.grey,
-          fontSize: 12,
+    return Builder(
+      builder: (context) => TextButton(
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(' $text page coming soon!')),
+          );
+        },
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 12,
+          ),
         ),
       ),
     );

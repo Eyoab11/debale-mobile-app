@@ -171,10 +171,10 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
       padding: const EdgeInsets.all(24),
       color: Colors.white,
       child: Column(
-        children: [
-          const Text(
+      children: [
+        const Text(
             'List Your Room',
-            style: TextStyle(
+          style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Color(0xFF222222),
@@ -201,7 +201,7 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                 'Step ${_currentStep + 1} of 4',
                 style: const TextStyle(
                   color: Color(0xFFF6CB5A),
-                  fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -215,10 +215,10 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
     return Expanded(
       child: Column(
         children: [
-          Container(
+        Container(
             width: 32,
             height: 32,
-            decoration: BoxDecoration(
+          decoration: BoxDecoration(
               color: isCompleted ? const Color(0xFFF6CB5A) : Colors.grey[300],
               shape: BoxShape.circle,
             ),
@@ -288,13 +288,13 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Basic Information',
-              style: TextStyle(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Basic Information',
+          style: TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold,
                 color: Color(0xFF222222),
               ),
             ),
@@ -309,20 +309,20 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
             const SizedBox(height: 32),
             Column(
               children: [
-                TextFormField(
+        TextFormField(
                   controller: _roomTitleController,
-                  decoration: const InputDecoration(
+          decoration: const InputDecoration(
                     labelText: 'Room Title*',
                     hintText: 'e.g., Cozy Room Near AAU Campus',
                     border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
                       return 'Please enter a room title';
-                    }
-                    return null;
-                  },
-                ),
+            }
+            return null;
+          },
+        ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -423,23 +423,23 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descriptionController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _descriptionController,
+          maxLines: 4,
+          decoration: const InputDecoration(
                     labelText: 'Description*',
                     hintText: 'Describe your room, the house, neighborhood, and what makes it special...',
                     border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-              ],
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a description';
+            }
+            return null;
+          },
+        ),
+      ],
             ),
             const SizedBox(height: 32),
             Row(
@@ -493,13 +493,13 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
             'Details & Preferences',
-            style: TextStyle(
+          style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold,
               color: Color(0xFF222222),
             ),
           ),
@@ -518,9 +518,9 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Color(0xFF222222),
-            ),
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 16),
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -566,11 +566,11 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   )).toList(),
-                  onChanged: (value) {
-                    setState(() {
+          onChanged: (value) {
+            setState(() {
                       _selectedGenderPreference = value ?? 'No preference';
-                    });
-                  },
+            });
+          },
                   isExpanded: true,
                 ),
               ),
@@ -578,7 +578,7 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: _selectedAgeRange,
-                  decoration: const InputDecoration(
+          decoration: const InputDecoration(
                     labelText: 'Preferred Age Range',
                     border: OutlineInputBorder(),
                   ),
@@ -616,11 +616,11 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   )).toList(),
-                  onChanged: (value) {
-                    setState(() {
+          onChanged: (value) {
+            setState(() {
                       _selectedOccupation = value ?? 'No preference';
-                    });
-                  },
+            });
+          },
                   isExpanded: true,
                 ),
               ),
@@ -638,19 +638,19 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
             ],
           ),
           const SizedBox(height: 32),
-          const Text(
+        const Text(
             'House Rules',
-            style: TextStyle(
+          style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold,
               color: Color(0xFF222222),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
             controller: _houseRulesController,
             maxLines: 4,
-            decoration: const InputDecoration(
+          decoration: const InputDecoration(
               labelText: 'House Rules',
               hintText: 'e.g., No smoking, Quiet hours 10 PM - 7 AM, Clean common areas...',
               border: OutlineInputBorder(),
@@ -704,13 +704,13 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
             'Add Photos',
-            style: TextStyle(
+          style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold,
               color: Color(0xFF222222),
             ),
           ),
@@ -797,17 +797,17 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
                   'Photo Tips:',
-                  style: TextStyle(
+          style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.bold,
                     color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(height: 8),
+          ),
+        ),
+        const SizedBox(height: 8),
                 const Text(
                   '• Take photos during the day with good natural lighting\n'
                   '• Include photos of the room, common areas, and exterior\n'
@@ -823,7 +823,7 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
           ),
           const SizedBox(height: 32),
           Row(
-            children: [
+          children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: _previousStep,
@@ -869,9 +869,9 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
             'Review Your Listing',
             style: TextStyle(
               fontSize: 24,
@@ -882,7 +882,7 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
           const SizedBox(height: 8),
           const Text(
             'Make sure everything looks good before publishing.',
-            style: TextStyle(
+          style: TextStyle(
               fontSize: 16,
               color: Colors.grey,
             ),
@@ -900,8 +900,8 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                 Text(
                   _roomTitleController.text.isEmpty ? 'Room Title' : _roomTitleController.text,
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
                     color: Color(0xFF222222),
                   ),
                 ),
@@ -1052,12 +1052,12 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
 
   void _publishListing() {
     // TODO: Implement listing publishing logic
-    ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Room listing published successfully!'),
         backgroundColor: Colors.green,
       ),
-    );
-    Navigator.pop(context);
+      );
+      Navigator.pop(context);
   }
 } 
